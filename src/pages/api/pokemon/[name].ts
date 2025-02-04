@@ -20,6 +20,7 @@ export default async function handler(
     const data: PokemonData = await response.json();
     res.status(200).json(data);
   } catch (error) {
+    console.log(error);
     res.status(404).json({ error: "Pokémon not found" });
   }
 }

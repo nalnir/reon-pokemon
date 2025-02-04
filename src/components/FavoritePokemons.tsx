@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { Pokemon } from "@/utils/types";
-import { useFavorites } from "@/utils/hooks/toggleFavorites";
+
 import { useEffect, useState } from "react";
+import { useFavorites } from "@/utils/hooks/toggleFavorites";
 
 export default function FavoritePokemons({
   filteredPokemons,

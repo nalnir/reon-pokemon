@@ -17,9 +17,12 @@ export interface PokemonData {
   abilities: Ability[];
   forms: NamedAPIResource[];
   game_indices: GameIndex[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   held_items: any[]; // Update with correct type if needed
   moves: Move[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   past_abilities: any[]; // Empty array, update with correct type if needed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   past_types: any[]; // Empty array, update with correct type if needed
   species: NamedAPIResource;
   sprites: Sprites;

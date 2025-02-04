@@ -10,7 +10,8 @@ export default async function handler(
     const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=20");
     const data = await response.json();
 
-    const pokemonDetails: Pokemon = await Promise.all(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pokemonDetails: any = await Promise.all(
       data.results.map(async (pokemon: { name: string; url: string }) => {
         const detailsResponse = await fetch(pokemon.url);
         const details: PokemonData = await detailsResponse.json();
@@ -24,6 +25,7 @@ export default async function handler(
 
     res.status(200).json({ pokemons: pokemonDetails });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ pokemons: [] });
   }
 }
