@@ -34,7 +34,7 @@ export default function PokemonTypeMenu({
       </button>
 
       {menuOpen && (
-        <div className="absolute rounded-lg mt-2 bg-white p-3 flex flex-col gap-3 h-48 overflow-y-scroll shadow-lg">
+        <div className="absolute rounded-lg mt-2 bg-white p-3 z-20 flex flex-col gap-3 h-48 overflow-y-scroll shadow-lg">
           <div className="cursor-pointer" onClick={() => selectType(null)}>
             <p className="text-black">All types</p>
           </div>
