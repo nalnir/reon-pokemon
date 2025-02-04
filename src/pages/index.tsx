@@ -1,5 +1,11 @@
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
+import { useEffect, useState } from "react";
+import { Pokemon, PokemonType } from "@/utils/types";
+import PokemonTypeMenu from "@/components/PokemonTypesMenu";
+import { useRouter } from "next/router";
+import FavoritePokemons from "@/components/FavoritePokemons";
+import { useFavorites } from "@/utils/hooks/toggleFavorites";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,103 +18,111 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const { favorites, toggleFavorite } = useFavorites();
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [pokemonTypes, setPokemonTypes] = useState<PokemonType[]>([]);
+  const [typeFilter, setTypeFilter] = useState<null | string>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    getPokemonTypes();
+  }, []);
+  useEffect(() => {
+    getPokemons();
+  }, []);
+
+  const getPokemons = async () => {
+    try {
+      const res = await fetch("/api/fetchPokemons"); // Ensure this matches your API route filename
+      const data: { pokemons: Pokemon[] } = await res.json(); // Parse JSON
+      setPokemons([...data.pokemons]);
+    } catch (error) {
+      console.error("Error fetching pokemons:", error);
+    }
+  };
+
+  const getPokemonTypes = async () => {
+    try {
+      const res = await fetch("/api/fetchPokemonTypes"); // Ensure this matches your API route filename
+      const data: { types: PokemonType[] } = await res.json(); // Parse JSON
+      console.log("data: ", data);
+      setPokemonTypes([...data.types]);
+    } catch (error) {
+      console.error("Error fetching pokemons:", error);
+    }
+  };
+
+  const filteredPokemons = pokemons.filter((pokemon) => {
+    const matchesName = pokemon.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesType =
+      !typeFilter ||
+      pokemon.data.types.some(
+        (t: { type: { name: string } }) => t.type.name === typeFilter
+      );
+
+    return matchesName && matchesType;
+  });
+
+  return (
+    <main
+      className={`${geistSans.variable} ${geistMono.variable} flex flex-row items-center justify-items-center min-h-screen p-8 pb-20 gap-3 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
+    >
+      <div className="gap-3 row-start-2 items-center sm:items-start flex flex-col w-full">
+        <div className="flex flex-row items-center w-full gap-3">
+          <input
+            className="flex w-full p-1 rounded-lg border border-gray-300"
+            placeholder="Search by name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <PokemonTypeMenu
+            selectedType={typeFilter}
+            pokemonTypes={pokemonTypes}
+            selectType={(type) => setTypeFilter(type)}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <div className="grid grid-cols-5 gap-3">
+          {filteredPokemons.map((pokemon, i) => {
+            return (
+              <div
+                onClick={() => router.push(`/pokemon/${pokemon.name}`)}
+                key={i}
+                className="p3 rounded-lg border border-white col-span-1 cursor-pointer flex flex-col justify-center items-center"
+              >
+                <Image
+                  alt="Pokemon sprite"
+                  src={pokemon.data.sprites.front_default ?? ""}
+                  width={100}
+                  height={100}
+                />
+                <p>{pokemon.name}</p>
+                <button
+                  className={`p-1 rounded-lg ${
+                    favorites.includes(pokemon.name)
+                      ? "bg-red-500"
+                      : "bg-blue-500"
+                  } text-white`}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent navigation when clicking the button
+                    toggleFavorite(pokemon.name);
+                  }}
+                >
+                  {favorites.includes(pokemon.name)
+                    ? "Remove Favorite"
+                    : "Add to Favorite"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="w-full">
+        <FavoritePokemons filteredPokemons={filteredPokemons} />
+      </div>
+    </main>
   );
 }
