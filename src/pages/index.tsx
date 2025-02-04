@@ -27,15 +27,13 @@ export default function Home() {
 
   useEffect(() => {
     getPokemonTypes();
-  }, []);
-  useEffect(() => {
     getPokemons();
   }, []);
 
   const getPokemons = async () => {
     try {
-      const res = await fetch("/api/fetchPokemons"); // Ensure this matches your API route filename
-      const data: { pokemons: Pokemon[] } = await res.json(); // Parse JSON
+      const res = await fetch("/api/fetchPokemons");
+      const data: { pokemons: Pokemon[] } = await res.json();
       setPokemons([...data.pokemons]);
     } catch (error) {
       console.error("Error fetching pokemons:", error);
@@ -44,9 +42,8 @@ export default function Home() {
 
   const getPokemonTypes = async () => {
     try {
-      const res = await fetch("/api/fetchPokemonTypes"); // Ensure this matches your API route filename
-      const data: { types: PokemonType[] } = await res.json(); // Parse JSON
-      console.log("data: ", data);
+      const res = await fetch("/api/fetchPokemonTypes");
+      const data: { types: PokemonType[] } = await res.json();
       setPokemonTypes([...data.types]);
     } catch (error) {
       console.error("Error fetching pokemons:", error);
@@ -57,70 +54,75 @@ export default function Home() {
     const matchesName = pokemon.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-
     const matchesType =
       !typeFilter ||
       pokemon.data.types.some(
         (t: { type: { name: string } }) => t.type.name === typeFilter
       );
-
     return matchesName && matchesType;
   });
 
   return (
     <main
-      className={`${geistSans.variable} ${geistMono.variable} flex flex-row items-center justify-items-center min-h-screen p-8 pb-20 gap-3 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
+      className={`${geistSans.variable} ${geistMono.variable} flex flex-col items-center min-h-screen p-8 sm:p-20 font-sans bg-gradient-to-br from-blue-100 to-blue-300`}
     >
-      <div className="gap-3 row-start-2 items-center sm:items-start flex flex-col w-full">
-        <div className="flex flex-row items-center w-full gap-3">
-          <input
-            className="flex w-full p-1 rounded-lg border border-gray-300"
-            placeholder="Search by name"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <PokemonTypeMenu
-            selectedType={typeFilter}
-            pokemonTypes={pokemonTypes}
-            selectType={(type) => setTypeFilter(type)}
-          />
-        </div>
-        <div className="grid grid-cols-5 gap-3">
-          {filteredPokemons.map((pokemon, i) => {
-            return (
-              <div
-                onClick={() => router.push(`/pokemon/${pokemon.name}`)}
-                key={i}
-                className="p3 rounded-lg border border-white col-span-1 cursor-pointer flex flex-col justify-center items-center"
-              >
-                <Image
-                  alt="Pokemon sprite"
-                  src={pokemon.data.sprites.front_default ?? ""}
-                  width={100}
-                  height={100}
-                />
-                <p>{pokemon.name}</p>
-                <button
-                  className={`p-1 rounded-lg ${
-                    favorites.includes(pokemon.name)
-                      ? "bg-red-500"
-                      : "bg-blue-500"
-                  } text-white`}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent navigation when clicking the button
-                    toggleFavorite(pokemon.name);
-                  }}
-                >
-                  {favorites.includes(pokemon.name)
-                    ? "Remove Favorite"
-                    : "Add to Favorite"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-center w-full gap-3 bg-white shadow-lg p-4 rounded-lg max-w-4xl border border-gray-200">
+        <input
+          className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+          placeholder="Search Pokémon by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <PokemonTypeMenu
+          selectedType={typeFilter}
+          pokemonTypes={pokemonTypes}
+          selectType={(type) => setTypeFilter(type)}
+        />
       </div>
-      <div className="w-full">
+
+      {/* Pokémon Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mt-8 w-full max-w-6xl">
+        {filteredPokemons.map((pokemon, i) => (
+          <div
+            key={i}
+            onClick={() => router.push(`/pokemon/${pokemon.name}`)}
+            className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl cursor-pointer flex flex-col items-center transition duration-300 transform hover:scale-105 border border-gray-200 hover:border-blue-400"
+          >
+            <Image
+              alt="Pokemon sprite"
+              src={pokemon.data.sprites.front_default ?? ""}
+              width={120}
+              height={120}
+              className="drop-shadow-lg"
+            />
+            <p className="mt-3 font-bold text-lg capitalize text-gray-800">
+              {pokemon.name}
+            </p>
+            <button
+              className={`mt-3 px-4 py-2 text-white rounded-lg transition text-lg ${
+                favorites.includes(pokemon.name)
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(pokemon.name);
+              }}
+            >
+              {favorites.includes(pokemon.name)
+                ? "Remove Favorite"
+                : "Add to Favorite"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Favorite Pokémon Section */}
+      <div className="w-full max-w-6xl mt-12 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
+          Favorite Pokémon
+        </h2>
         <FavoritePokemons filteredPokemons={filteredPokemons} />
       </div>
     </main>
